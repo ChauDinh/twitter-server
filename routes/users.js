@@ -74,7 +74,7 @@ router.route("/login")
 router.route("/")
   .get(passport.authenticate('jwt', { session: false }), (req, res) => {
     res.json({
-      id: req.user._id,
+      _id: req.user._id,
       email: req.user.email,
       username: req.user.username,
       followesr: req.user.followers,
