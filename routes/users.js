@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const passport = require("passport");
 
 const User = require("../models/User");
 
@@ -38,36 +39,47 @@ router.route('/register')
       })
   });
 
-  router.route("/login")
-    .post((req, res) => {
-      const { isValid, errors } = validateLoginInput(req.body);
-      
-      if (!isValid) {
-        return res.status(404).json(errors);
-      }
+router.route("/login")
+  .post((req, res) => {
+    const { isValid, errors } = validateLoginInput(req.body);
+    
+    if (!isValid) {
+      return res.status(404).json(errors);
+    }
 
-      User.findOne({ email: req.body.email })
-        .then(user => {
-          if (user) {
-            bcrypt.compare(req.body.password, user.password)
-            .then(isMatch => {
-              if (isMatch) {
-                const token = jwt.sign({ id: user._id }, process.env.SECRET, { expiresIn: '1d' }, function(err, token) {
-                  return res.json({
-                    success: true,
-                    token: token
-                  })
-                });
-              } else {
-                errors.password = 'Password is incorrect';
-                return res.status(404).json(errors);
-              }
-            })
-          } else {
-            errors.email = 'User not found';
-            return res.status(404).json(errors);
-          }
-        })
+    User.findOne({ email: req.body.email })
+      .then(user => {
+        if (user) {
+          bcrypt.compare(req.body.password, user.password)
+          .then(isMatch => {
+            if (isMatch) {
+              const token = jwt.sign({ id: user._id }, process.env.SECRET, { expiresIn: '1d' }, function(err, token) {
+                return res.json({
+                  success: true,
+                  token: token
+                })
+              });
+            } else {
+              errors.password = 'Password is incorrect';
+              return res.status(404).json(errors);
+            }
+          })
+        } else {
+          errors.email = 'User not found';
+          return res.status(404).json(errors);
+        }
+      })
+  })
+
+router.route("/")
+  .get(passport.authenticate('jwt', { session: false }), (req, res) => {
+    res.json({
+      id: req.user._id,
+      email: req.user.email,
+      username: req.user.username,
+      followesr: req.user.followers,
+      following: req.user.following
     })
+  })
 
 module.exports = router;
