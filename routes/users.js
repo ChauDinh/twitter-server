@@ -80,6 +80,25 @@ router.route("/")
       followesr: req.user.followers,
       following: req.user.following
     })
-  })
+  });
+
+router.route("/:id")
+  .get((req, res) => {
+    User.findById(req.params.id)
+      .then(user => {
+        if (user) {
+          return res.json({
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            followers: user.followers,
+            following: user.following
+          })
+        } else {
+          return res.status(404).json({ msg: 'User not found or be banned!' })
+        }
+      })
+      .catch(err => console.error(err))
+  });
 
 module.exports = router;

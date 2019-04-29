@@ -23,9 +23,17 @@ router.route("/add")
 router.route("/")
   .get((req, res) => {
     Post.find()
-      .sort({ createAt: -1 })
-      .then(posts => res.json(posts))
-      .catch(err => console.error(err));
+        .sort({ createdAt: -1 })
+        .then(posts => res.json(posts))
+        .catch(err => console.error(err));
+  });
+
+router.route("/:userId")
+  .get((req, res) => {
+    Post.find({ 'user.id': req.params.userId })
+        .sort({ createdAt: -1 })
+        .then(posts => res.json(posts))
+        .catch(err => console.error(err));
   });
 
 module.exports = router;
