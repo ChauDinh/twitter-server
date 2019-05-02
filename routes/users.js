@@ -143,7 +143,7 @@ router.route("/search")
       ]
     })
     .then(user => res.json({ userId: user._id }))
-    .catch(err => console.error(err));
+    .catch(err => res.status(404).json({ msg: 'User not found' }) );
   })
 
 router.route("/:id")
